@@ -8,7 +8,23 @@ with open(sys.argv[1],'r') as file:
             l.append(line[:-1])
         line = file.readline()
     print(l)
-    
+
+def memorySeg(name):
+    if name == 'local':
+        return 'LCL'
+    elif name == 'argument':
+        return 'ARG'
+    elif name == 'this':
+        return 'THIS'
+    elif name == 'that':
+        return 'THAT'
+    elif name == 'temp':
+        return
+    elif name == 'static':
+        return
+    elif name == 'pointer':
+        return
+
 def spMinusOne():
     file.write('\n@0\nM=M-1\n\n')
     
@@ -86,7 +102,33 @@ def compilerByLine(lineList,xArgs):
                 i = lineList[2]
                 command = "@" + i + "\nD=A\n@0\nA=M\nM=D\n"
                 file.write(command)
+            elif lineList[1]=='temp':
+                i = int(lineList[2])
+                i = i + 5
+                file.write('@'+str(i)+'\nD=M\n')
+                file.write('@0\nA=M\nM=D\n')
+            elif lineList[1]=='pointer':
+                pass
+            else:
+                file.write('@'+memorySeg(lineList[1])+'\nD=M\n')
+                file.write('@'+lineList[2]+'\nD=D+A\n')
+                file.write('A=D\nD=M\n@0\nA=M\nM=D\n')
             spPlusOne()
+        elif lineList[0] == 'pop':
+            if lineList[1]=='temp':
+                i = int(lineList[2])
+                i = i + 5
+                spMinusOne()
+                file.write('A=M\nD=M\n@'+str(i)+'\nM=D\n')
+            elif lineList[1]=='pointer':
+                pass
+            else:
+                file.write('@'+memorySeg(lineList[1])+'\nD=M\n')
+                file.write('@'+lineList[2]+'\nD=D+A\n')
+                file.write('@13\nM=D\n')
+                spMinusOne()
+                file.write('@0\nA=M\nD=M\n\n@R13\nA=M\nM=D\n')
+        
 
 assembledFileName = sys.argv[1][:-2]+'asm'
 with open(assembledFileName, 'w') as file:
