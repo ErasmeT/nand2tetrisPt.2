@@ -1,7 +1,8 @@
 import sys
 jumpCounter = 0
 l = []
-with open(sys.argv[1],'r') as file:
+filename = sys.argv[1]
+with open(filename,'r') as file:
     line = file.readline() 
     while line: 
         if line != '\n' and line[0:2] != '//':
@@ -28,10 +29,10 @@ def memorySeg(name):
         elif name[2] == '1':
             return '4'
 def spMinusOne():
-    file.write('\n@0\nM=M-1\n\n')
+    file.write('\n@0\nM=M-1\n')
     
 def spPlusOne():
-    file.write('\n@0\nM=M+1\n\n')
+    file.write('\n@0\nM=M+1\n')
 
 def compilerByLine(lineList,xArgs):
     global jumpCounter
@@ -113,7 +114,9 @@ def compilerByLine(lineList,xArgs):
                 file.write('@'+memorySeg(lineList)+'\nD=M\n')
                 file.write('@0\nA=M\nM=D')
             elif lineList[1]=='static':
-                name = sys.argv[1][2:-2] + lineList[2]
+                name = filename[:-2] + lineList[2]
+                if '/' in name:
+                    name=name.replace('/','')
                 file.write('@'+name+'\nD=M\n')
                 file.write('@0\nA=M\nM=D\n')
             else:
@@ -131,7 +134,9 @@ def compilerByLine(lineList,xArgs):
                 file.write('A=M\nD=M\n')
                 file.write('@'+memorySeg(lineList)+'\nM=D\n')
             elif lineList[1]=='static':
-                name = sys.argv[1][2:-2] + lineList[2]
+                name = filename[:-2] + lineList[2]
+                if '/' in name:
+                    name=name.replace('/','')
                 file.write('A=M\nD=M\n@'+name+'\nM=D\n')
             else:
                 file.write('@'+memorySeg(lineList)+'\nD=M\n')
@@ -139,9 +144,15 @@ def compilerByLine(lineList,xArgs):
                 file.write('@13\nM=D\n')
                 file.write('@0\nA=M\nD=M\n\n@R13\nA=M\nM=D\n')
         
-assembledFileName = sys.argv[1][:-2]+'asm'
+assembledFileName = filename[:-2]+'asm'
 with open(assembledFileName, 'w') as file:
     for i in range(len(l)):
         commandList = l[i].split()
         print(commandList)
         compilerByLine(commandList,len(commandList))
+        
+with open(assembledFileName, 'w') as file:
+    for i in range(len(l)):
+        commandList = l[i].split()
+        print(commandList)
+        compilerByLine(commandList,len(commandList))  
