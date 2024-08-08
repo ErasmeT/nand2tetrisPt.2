@@ -1,4 +1,5 @@
 import sys
+import os
 jumpCounter = 0
 l = []
 with open(sys.argv[1],'r') as file:
@@ -28,15 +29,15 @@ def memorySeg(name):
         elif name[2] == '1':
             return '4'
 def spMinusOne():
-    file.write('\n@0\nM=M-1\n\n')
+    file.write('\n@0\nM=M-1\n')
     
 def spPlusOne():
-    file.write('\n@0\nM=M+1\n\n')
+    file.write('\n@0\nM=M+1\n')
 
 def compilerByLine(lineList,xArgs):
     global jumpCounter
-    prefix ='//'+' '.join(lineList)+'\n'
-    file.write(prefix)
+    #prefix ='//'+' '.join(lineList)+'\n'
+    #file.write(prefix)
     if xArgs == 1:
         if lineList[0] == 'add':
             spMinusOne()
