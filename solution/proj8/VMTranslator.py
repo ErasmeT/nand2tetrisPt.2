@@ -5,8 +5,12 @@ filename = sys.argv[1]
 with open(filename,'r') as file:
     line = file.readline() 
     while line: 
-        if line != '\n' and line[0:2] != '//':
-            l.append(line[:-1])
+        if line[0:2] != ['//'] and line != '\n':
+            if '//' in line:
+                index = line.find('//')
+                line = line[:index]
+            if line != '':
+                l.append(line[:-1])
         line = file.readline()
     print(l)
 
@@ -99,6 +103,16 @@ def compilerByLine(lineList,xArgs):
             file.write("A=M\nM=!M\n")
             spPlusOne()
         
+    elif xArgs == 2:
+        if lineList[0] == 'label':
+            file.write('('+lineList[1]+')\n')
+        elif lineList[0] == 'goto':
+            file.write('@'+lineList[1]+'\n')
+            file.write('0;JMP\n')
+        elif lineList[0] == 'if-goto':
+            spMinusOne()
+            file.write('@SP\nA=M\nD=M\n@'+lineList[1]+'\nD;JGT\n')
+
     elif xArgs == 3:
         if lineList[0] == 'push':
             if lineList[1] == 'constant':
@@ -150,9 +164,3 @@ with open(assembledFileName, 'w') as file:
         commandList = l[i].split()
         print(commandList)
         compilerByLine(commandList,len(commandList))
-        
-with open(assembledFileName, 'w') as file:
-    for i in range(len(l)):
-        commandList = l[i].split()
-        print(commandList)
-        compilerByLine(commandList,len(commandList))  
