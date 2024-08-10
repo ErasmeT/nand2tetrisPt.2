@@ -111,7 +111,7 @@ def compilerByLine(lineList,xArgs):
             file.write('0;JMP\n')
         elif lineList[0] == 'if-goto':
             spMinusOne()
-            file.write('@SP\nA=M\nD=M\n@'+lineList[1]+'\nD;JGT\n')
+            file.write('@SP\nA=M\nD=M\n@'+lineList[1]+'\nD;JNE\n')
 
     elif xArgs == 3:
         if lineList[0] == 'push':
