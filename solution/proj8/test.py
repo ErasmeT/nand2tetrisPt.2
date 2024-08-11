@@ -2,15 +2,14 @@ import sys
 jumpCounter = 0
 l = []
 filename = sys.argv[1]
-with open(filename,'r') as file:
+with open(filename + '/Sys.vm','r') as file:
     line = file.readline() 
     while line: 
         if line[0:2] != ['//'] and line != '\n':
             if '//' in line:
                 index = line.find('//')
                 line = line[:index]
-            if line != '':
-                l.append(line[:-1])
+        l.append(line)
         line = file.readline()
     print(l)
 

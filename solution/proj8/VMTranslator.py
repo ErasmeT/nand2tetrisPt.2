@@ -1,16 +1,17 @@
 import sys
+import os
 jumpCounter = 0
 l = []
-filename = sys.argv[1]
-with open(filename,'r') as file:
+filename = os.path.basename(sys.argv[1])
+filenameWithPath = sys.argv[1]
+with open(filenameWithPath,'r') as file:
     line = file.readline() 
     while line: 
         if line[0:2] != ['//'] and line != '\n':
             if '//' in line:
                 index = line.find('//')
                 line = line[:index]
-            if line != '':
-                l.append(line[:-1])
+        l.append(line)
         line = file.readline()
     print(l)
 
@@ -38,11 +39,11 @@ def spMinusOne():
 def spPlusOne():
     file.write('\n@0\nM=M+1\n')
 
-def compilerByLine(lineList,xArgs):
+def compilerByLine(lineList,xArgsOfCommand):
     global jumpCounter
     prefix ='//'+' '.join(lineList)+'\n'
     file.write(prefix)
-    if xArgs == 1:
+    if xArgsOfCommand == 1:
         if lineList[0] == 'add':
             spMinusOne()
             file.write("A=M\nD=M\n")
@@ -102,8 +103,18 @@ def compilerByLine(lineList,xArgs):
             spMinusOne()
             file.write("A=M\nM=!M\n")
             spPlusOne()
+        if lineList[0] == 'return':
+            file.write('@LCL\nD=M\n@R14\nM=D\n')
+            file.write('@5\nD=D-A\nA=M\nD=M\n@R15\nM=D\n')
+            file.write('@ARG\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D\n')
+            file.write('@ARG\nD=M+1\n@SP\nM=D\n')
+            file.write('@R14\nD=M-1\nA=M\nD=M\n@THAT\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nA=M\nD=M\n@THIS\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nA=M\nD=M\n@ARG\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nD=D-1\nA=M\nD=M\n@LCL\nM=D\n')
+            file.write('@R15\n0;JMP\n')
         
-    elif xArgs == 2:
+    elif xArgsOfCommand == 2:
         if lineList[0] == 'label':
             file.write('('+lineList[1]+')\n')
         elif lineList[0] == 'goto':
@@ -113,7 +124,7 @@ def compilerByLine(lineList,xArgs):
             spMinusOne()
             file.write('@SP\nA=M\nD=M\n@'+lineList[1]+'\nD;JNE\n')
 
-    elif xArgs == 3:
+    elif xArgsOfCommand == 3:
         if lineList[0] == 'push':
             if lineList[1] == 'constant':
                 i = lineList[2]
@@ -157,8 +168,29 @@ def compilerByLine(lineList,xArgs):
                 file.write('@'+lineList[2]+'\nD=D+A\n')
                 file.write('@13\nM=D\n')
                 file.write('@0\nA=M\nD=M\n\n@R13\nA=M\nM=D\n')
+        elif lineList[0] == 'call':
+            file.write('@returnAddress\nD=A\n@SP\nA=M\nM=D\n')
+            spPlusOne()
+            file.write('@LCL\nD=M\n@SP\nA=M\nM=D\n')
+            spPlusOne()
+            file.write('@ARG\nD=M\n@SP\nA=M\nM=D\n')
+            spPlusOne()
+            file.write('@THIS\nD=M\n@SP\nA=M\nM=D\n')
+            spPlusOne()
+            file.write('@THAT\nD=M\n@SP\nA=M\nM=D\n')
+            spPlusOne()
+            file.write('@SP\nD=M\n@5\nD=D-A\n@'+lineList[2]+'\nD=D-A\n@ARG\nM=D\n')
+            file.write('@SP\nD=M\n@LCL\nM=D\n')
+            file.write('@'+lineList[1]+'\n0;JMP\n(returnAddress'+str(jumpCounter)+')\n')
+            jumpCounter+=1
+        elif lineList[0] == 'function':
+            file.write('('+lineList[1]+')\n')
+            nVars = int(lineList[2])
+            for i in range(nVars):
+                file.write('@0\nD=M\nA=M\nM=D\n')
+                spPlusOne()
         
-assembledFileName = filename[:-2]+'asm'
+assembledFileName = filenameWithPath[:-2]+'asm'
 with open(assembledFileName, 'w') as file:
     for i in range(len(l)):
         commandList = l[i].split()
