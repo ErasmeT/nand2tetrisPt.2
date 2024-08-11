@@ -140,8 +140,6 @@ def compilerByLine(lineList,xArgsOfCommand):
                 file.write('@0\nA=M\nM=D')
             elif lineList[1]=='static':
                 name = filename[:-2] + lineList[2]
-                if '/' in name:
-                    name=name.replace('/','')
                 file.write('@'+name+'\nD=M\n')
                 file.write('@0\nA=M\nM=D\n')
             else:
@@ -160,8 +158,6 @@ def compilerByLine(lineList,xArgsOfCommand):
                 file.write('@'+memorySeg(lineList)+'\nM=D\n')
             elif lineList[1]=='static':
                 name = filename[:-2] + lineList[2]
-                if '/' in name:
-                    name=name.replace('/','')
                 file.write('A=M\nD=M\n@'+name+'\nM=D\n')
             else:
                 file.write('@'+memorySeg(lineList)+'\nD=M\n')
