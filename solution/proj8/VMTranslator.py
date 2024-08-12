@@ -1,19 +1,20 @@
 import sys
 import os
 jumpCounter = 0
-l = []
-filename = os.path.basename(sys.argv[1])
-filenameWithPath = sys.argv[1]
-with open(filenameWithPath,'r') as file:
-    line = file.readline() 
-    while line: 
-        if line[0:2] != ['//'] and line != '\n':
-            if '//' in line:
-                index = line.find('//')
-                line = line[:index]
-        l.append(line)
-        line = file.readline()
-    print(l)
+
+def parser(pathToProcess):
+    l = []
+    with open(pathToProcess,'r') as file:
+        line = file.readline() 
+        while line: 
+            if line[0:2] != ['//'] and line != '\n':
+                if '//' in line:
+                    index = line.find('//')
+                    line = line[:index]
+            l.append(line)
+            line = file.readline()
+        #print(l)
+    return l
 
 def memorySeg(name):
     if name[1] == 'local':
@@ -33,13 +34,14 @@ def memorySeg(name):
             return '3'
         elif name[2] == '1':
             return '4'
+
 def spMinusOne():
     file.write('\n@0\nM=M-1\n')
     
 def spPlusOne():
     file.write('\n@0\nM=M+1\n')
 
-def compilerByLine(lineList,xArgsOfCommand):
+def compilerByLine(eachFileName,lineList,xArgsOfCommand):
     global jumpCounter
     prefix ='//'+' '.join(lineList)+'\n'
     file.write(prefix)
@@ -165,6 +167,7 @@ def compilerByLine(lineList,xArgsOfCommand):
                 file.write('@13\nM=D\n')
                 file.write('@0\nA=M\nD=M\n\n@R13\nA=M\nM=D\n')
         elif lineList[0] == 'call':
+            returnAddress = eachFileName+'$ret.'+str(jumpCounter)
             file.write('@returnAddress\nD=A\n@SP\nA=M\nM=D\n')
             spPlusOne()
             file.write('@LCL\nD=M\n@SP\nA=M\nM=D\n')
@@ -177,7 +180,7 @@ def compilerByLine(lineList,xArgsOfCommand):
             spPlusOne()
             file.write('@SP\nD=M\n@5\nD=D-A\n@'+lineList[2]+'\nD=D-A\n@ARG\nM=D\n')
             file.write('@SP\nD=M\n@LCL\nM=D\n')
-            file.write('@'+lineList[1]+'\n0;JMP\n(returnAddress'+str(jumpCounter)+')\n')
+            file.write('@'+lineList[1]+'\n0;JMP\n('+returnAddress+')\n')
             jumpCounter+=1
         elif lineList[0] == 'function':
             file.write('('+lineList[1]+')\n')
@@ -185,10 +188,42 @@ def compilerByLine(lineList,xArgsOfCommand):
             for i in range(nVars):
                 file.write('@0\nD=M\nA=M\nM=D\n')
                 spPlusOne()
-        
-assembledFileName = filenameWithPath[:-2]+'asm'
+
+if '.vm' in sys.argv[1]:
+    filename = os.path.basename(sys.argv[1])
+    filepath = sys.argv[1]
+    assembledFileName = filepath[:-2]+'asm'
+elif sys.argv[1] == '\\':
+    folderPath = sys.argv[1]
+    assembledFileName = os.path.dirname(sys.argv[1]) + '.asm'
+else:
+    folderPath = sys.argv[1] + '\\'
+    assembledFileName = sys.argv[1] + '.asm'
+
+print(assembledFileName)
+allFile = os.listdir(folderPath)
+fileToProcess = []
+for i in allFile:
+    if '.vm' in i:
+        fileToProcess.append(folderPath+i)
+
+for i in fileToProcess:
+    if i == 'Sys.vm':
+        sysindex=fileToProcess.index(i)
+        temp = fileToProcess[0]
+        fileToProcess[0] = fileToProcess[sysindex]
+        fileToProcess[sysindex]=temp
+
+
+print(folderPath)
+print(fileToProcess)
+
+
 with open(assembledFileName, 'w') as file:
-    for i in range(len(l)):
-        commandList = l[i].split()
-        print(commandList)
-        compilerByLine(commandList,len(commandList))
+    for j in fileToProcess:
+        print("\nNOW DEALING WITH "+os.path.basename(j)[:-3])
+        l = parser(j)
+        for i in range(len(l)):
+            commandList = l[i].split()
+            print(commandList)
+            compilerByLine(os.path.basename(j)[:-3],commandList,len(commandList))
