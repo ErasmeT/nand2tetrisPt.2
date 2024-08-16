@@ -108,14 +108,15 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
             spPlusOne()
         if lineList[0] == 'return':
             file.write('@LCL\nD=M\n@R14\nM=D\n')
-            file.write('@5\nD=D-A\nA=M\nD=M\n@R15\nM=D\n')
-            file.write('@ARG\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D\n')
+            file.write('@5\nD=D-A\nA=D\nD=M\n@R15\nM=D\n')
+            spMinusOne()
+            file.write('A=M\nD=M\n@ARG\nA=M\nM=D\n')
             file.write('@ARG\nD=M+1\n@SP\nM=D\n')
-            file.write('@R14\nD=M-1\nA=M\nD=M\n@THAT\nM=D\n')
-            file.write('@R14\nD=M-1\nD=D-1\nA=M\nD=M\n@THIS\nM=D\n')
-            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nA=M\nD=M\n@ARG\nM=D\n')
-            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nD=D-1\nA=M\nD=M\n@LCL\nM=D\n')
-            file.write('@R15\n0;JMP\n')
+            file.write('@R14\nD=M-1\nA=D\nD=M\n@THAT\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nA=D\nD=M\n@THIS\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nA=D\nD=M\n@ARG\nM=D\n')
+            file.write('@R14\nD=M-1\nD=D-1\nD=D-1\nD=D-1\nA=D\nD=M\n@LCL\nM=D\n')
+            file.write('@R15\nA=M\n0;JMP\n')
         
     elif xArgsOfCommand == 2:
         if lineList[0] == 'label':

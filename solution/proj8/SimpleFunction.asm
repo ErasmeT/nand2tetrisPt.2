@@ -1,11 +1,3 @@
-//
-//
-//
-//
-//
-//
-//
-//
 // function SimpleFunction.test 2
 (SimpleFunction.test)
 @2
@@ -27,9 +19,6 @@ M=M-1
 @LOOP_SimpleFunction.test
 0;JMP
 (END_SimpleFunction.test)
-
-@0
-M=M+1
 //push local 0
 @LCL
 D=M
@@ -138,19 +127,18 @@ M=M+1
 D=M
 @R14
 M=D
-
-
 @5
 D=D-A
-A=M
+A=D
 D=M
 @R15
 M=D
-@ARG
+
+@0
+M=M-1
 A=M
 D=M
-@SP
-M=M-1
+@ARG
 A=M
 M=D
 @ARG
@@ -159,14 +147,14 @@ D=M+1
 M=D
 @R14
 D=M-1
-A=M
+A=D
 D=M
 @THAT
 M=D
 @R14
 D=M-1
 D=D-1
-A=M
+A=D
 D=M
 @THIS
 M=D
@@ -174,7 +162,7 @@ M=D
 D=M-1
 D=D-1
 D=D-1
-A=M
+A=D
 D=M
 @ARG
 M=D
@@ -183,9 +171,10 @@ D=M-1
 D=D-1
 D=D-1
 D=D-1
-A=M
+A=D
 D=M
 @LCL
 M=D
 @R15
+A=M
 0;JMP
