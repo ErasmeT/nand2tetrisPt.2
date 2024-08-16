@@ -1,6 +1,7 @@
 import sys
 import os
 jumpCounter = 0
+filearg = sys.argv[1]
 
 def parser(pathToProcess):
     l = []
@@ -189,16 +190,29 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
                 file.write('@0\nD=M\nA=M\nM=D\n')
                 spPlusOne()
 
-if '.vm' in sys.argv[1]:
-    filename = os.path.basename(sys.argv[1])
-    filepath = sys.argv[1]
-    assembledFileName = filepath[:-2]+'asm'
-elif sys.argv[1] == '\\':
-    folderPath = sys.argv[1]
-    assembledFileName = os.path.dirname(sys.argv[1]) + '.asm'
-else:
-    folderPath = sys.argv[1] + '\\'
-    assembledFileName = sys.argv[1] + '.asm'
+if '\\' in filearg: #Windows
+    if '.vm' in filearg:
+        filename = os.path.basename(filearg)
+        filepath = filearg
+        assembledFileName = filepath[:-2]+'asm'
+    elif filearg[-1] == '\\':
+        folderPath = filearg
+        assembledFileName = os.path.dirname(filearg) + '.asm'
+    else:
+        folderPath = filearg + '\\'
+        assembledFileName = filearg + '.asm'
+elif '/' in filearg: #Moc or Linux
+    if '.vm' in filearg:
+        filename = os.path.basename(filearg)
+        filepath = filearg
+        assembledFileName = filepath[:-2]+'asm'
+    elif filearg[-1] == '/':
+        folderPath = filearg
+        assembledFileName = folderPath[:-1] + '.asm'
+    else:
+        folderPath = filearg + '/'
+        assembledFileName = filearg + '.asm'
+
 
 print(assembledFileName)
 allFile = os.listdir(folderPath)
