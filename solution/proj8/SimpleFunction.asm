@@ -6,19 +6,27 @@
 //
 //
 //
-//function SimpleFunction.test 2
+// function SimpleFunction.test 2
 (SimpleFunction.test)
-@0
-D=M
-A=M
+@2
+D=A
+@13
 M=D
-
-@0
+(LOOP_SimpleFunction.test)
+@13
+D=M
+@END_SimpleFunction.test
+D;JEQ
+@SP
+A=M
+M=0
+@SP
 M=M+1
-@0
-D=M
-A=M
-M=D
+@13
+M=M-1
+@LOOP_SimpleFunction.test
+0;JMP
+(END_SimpleFunction.test)
 
 @0
 M=M+1
@@ -130,6 +138,8 @@ M=M+1
 D=M
 @R14
 M=D
+
+
 @5
 D=D-A
 A=M
