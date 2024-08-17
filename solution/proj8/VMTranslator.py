@@ -143,7 +143,7 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
                 file.write('@'+memorySeg(lineList)+'\nD=M\n')
                 file.write('@0\nA=M\nM=D')
             elif lineList[1]=='static':
-                name = filename[:-2] + lineList[2]
+                name = eachFileName + '.' + lineList[2]
                 file.write('@'+name+'\nD=M\n')
                 file.write('@0\nA=M\nM=D\n')
             else:
@@ -161,7 +161,7 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
                 file.write('A=M\nD=M\n')
                 file.write('@'+memorySeg(lineList)+'\nM=D\n')
             elif lineList[1]=='static':
-                name = filename[:-2] + lineList[2]
+                name = eachFileName + '.' + lineList[2]
                 file.write('A=M\nD=M\n@'+name+'\nM=D\n')
             else:
                 file.write('@'+memorySeg(lineList)+'\nD=M\n')
@@ -214,27 +214,27 @@ elif '/' in filearg: #Moc or Linux
         folderPath = filearg + '/'
         assembledFileName = filearg + '.asm'
 
+def boostrap():
+    file.write('// boostrap\n@256\nD=A\n@SP\nM=D\n@boostrap\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@SP\nD=M\n@5\nD=D-A\n@ARG\nM=D\n@SP\nD=M\n@LCL\nM=D\n@Sys.init\n0;JMP\n(boostrap)\n')
 
 print(assembledFileName)
 allFile = os.listdir(folderPath)
 fileToProcess = []
+sysDetection = 0
 for i in allFile:
     if '.vm' in i:
         fileToProcess.append(folderPath+i)
-
-for i in fileToProcess:
     if i == 'Sys.vm':
-        sysindex=fileToProcess.index(i)
-        temp = fileToProcess[0]
-        fileToProcess[0] = fileToProcess[sysindex]
-        fileToProcess[sysindex]=temp
-
+       sysDetection = True
+       print("boostrap")
 
 print(folderPath)
 print(fileToProcess)
 
 
 with open(assembledFileName, 'w') as file:
+    if sysDetection:
+        boostrap()
     for j in fileToProcess:
         print("\nNOW DEALING WITH "+os.path.basename(j)[:-3])
         l = parser(j)

@@ -1,24 +1,25 @@
-// function SimpleFunction.test 2
+//
+//
+//
+//
+//
+//
+//
+//
+//function SimpleFunction.test 2
 (SimpleFunction.test)
-@2
-D=A
-@13
-M=D
-(LOOP_SimpleFunction.test)
-@13
-D=M
-@END_SimpleFunction.test
-D;JEQ
-@SP
+@0
 A=M
 M=0
-@SP
+
+@0
 M=M+1
-@13
-M=M-1
-@LOOP_SimpleFunction.test
-0;JMP
-(END_SimpleFunction.test)
+@0
+A=M
+M=0
+
+@0
+M=M+1
 //push local 0
 @LCL
 D=M
