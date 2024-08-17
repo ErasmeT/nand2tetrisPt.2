@@ -191,72 +191,59 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
                 file.write('@0\nA=M\nM=0\n')
                 spPlusOne()
 
-# if '\\' in filearg: #Windows
-#     if '.vm' in filearg:
-#         filename = os.path.basename(filearg)
-#         filepath = filearg
-#         assembledFilePath = filepath[:-2]+'asm'
-#     elif filearg[-1] == '\\':
-#         folderPath = filearg
-#         assembledFilePath = os.path.dirname(filearg) + '.asm'
-#     else:
-#         folderPath = filearg + '\\'
-#         assembledFilePath = filearg + '.asm'
-# elif '/' in filearg: #Moc or Linux
-absPath = os.path.abspath(filearg)
-if '.vm' in absPath:
-    filename = os.path.basename(absPath)
-    filepath = absPath
-    assembledFilePath = filepath[:-2]+'asm'
-    FileType = 'vm'
-elif absPath[-1] == '/':
-    folderPath = absPath
-    temp = absPath[:-1]
-    index = temp.rfind('/')
-    assembledFileName = temp[index+1:]
-    assembledFilePath = folderPath + assembledFileName + '.asm'
-    FileType = 'folder'
-else:
-    folderPath = absPath + '/'
-    index = absPath.rfind('/')
-    assembledFileName = absPath[index+1:]
-    assembledFilePath = folderPath + assembledFileName + '.asm'
-    FileType = 'folder'
+if '\\' in filearg: #Windows
+    if '.vm' in filearg:
+        filename = os.path.basename(filearg)
+        filepath = filearg
+        assembledFilePath = filepath[:-2]+'asm'
+    elif filearg[-1] == '\\':
+        folderPath = filearg
+        assembledFilePath = os.path.dirname(filearg) + '.asm'
+    else:
+        folderPath = filearg + '\\'
+        assembledFilePath = filearg + '.asm'
+elif '/' in filearg: #Moc or Linux
+    if '.vm' in filearg:
+        filename = os.path.basename(filearg)
+        filepath = filearg
+        assembledFilePath = filepath[:-2]+'asm'
+    elif filearg[-1] == '/':
+        folderPath = filearg
+        temp = filearg[:-1]
+        index = temp.rfind('/')
+        assembledFileName = temp[index+1:]
+        assembledFilePath = folderPath + assembledFileName + '.asm'
+    else:
+        folderPath = filearg + '/'
+        index = filearg.rfind('/')
+        assembledFileName = filearg[index+1:]
+        assembledFilePath = folderPath + assembledFileName + '.asm'
 
 def boostrap():
     file.write('// boostrap\n@256\nD=A\n@SP\nM=D\n@boostrap\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@SP\nD=M\n@5\nD=D-A\n@ARG\nM=D\n@SP\nD=M\n@LCL\nM=D\n@Sys.init\n0;JMP\n(boostrap)\n')
 
+print(assembledFilePath)
+allFile = os.listdir(folderPath)
+fileToProcess = []
+sysDetection = 0
+for i in allFile:
+    if '.vm' in i:
+        fileToProcess.append(folderPath+i)
+    if i == 'Sys.vm':
+       sysDetection = True
+       print("boostrap")
+
+print(folderPath)
+print(fileToProcess)
 
 
-if FileType == 'folder':
-    print(assembledFilePath)
-    allFile = os.listdir(folderPath)
-    fileToProcess = []
-    sysDetection = False
-    for i in allFile:
-        if '.vm' in i:
-            fileToProcess.append(folderPath+i)
-        if i == 'Sys.vm':
-            sysDetection = True
-            print("boostrap")
-
-    print(folderPath)
-    print(fileToProcess)
-    
-    with open(assembledFilePath, 'w') as file:
-        if sysDetection:
-            boostrap()
-        for j in fileToProcess:
-            print("\nNOW DEALING WITH "+os.path.basename(j)[:-3])
-            l = parser(j)
-            for i in range(len(l)):
-                commandList = l[i].split()
-                print(commandList)
-                compilerByLine(os.path.basename(j)[:-3],commandList,len(commandList))
-elif FileType == 'vm':
-    with open(assembledFilePath, 'w') as file:
-        l = parser(filepath)
+with open(assembledFilePath, 'w') as file:
+    if sysDetection:
+        boostrap()
+    for j in fileToProcess:
+        print("\nNOW DEALING WITH "+os.path.basename(j)[:-3])
+        l = parser(j)
         for i in range(len(l)):
             commandList = l[i].split()
             print(commandList)
-            compilerByLine(filename,commandList,len(commandList))
+            compilerByLine(os.path.basename(j)[:-3],commandList,len(commandList))
