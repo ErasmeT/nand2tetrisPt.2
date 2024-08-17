@@ -106,7 +106,7 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
             spMinusOne()
             file.write("A=M\nM=!M\n")
             spPlusOne()
-        if lineList[0] == 'return':
+        if lineList[0] == 'return':#this part is already perfect,do not modify
             file.write('@LCL\nD=M\n@R14\nM=D\n')
             file.write('@5\nD=D-A\nA=D\nD=M\n@R15\nM=D\n')
             spMinusOne()
@@ -170,7 +170,7 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
                 file.write('@0\nA=M\nD=M\n\n@R13\nA=M\nM=D\n')
         elif lineList[0] == 'call':
             returnAddress = eachFileName+'$ret.'+str(jumpCounter)
-            file.write('@returnAddress\nD=A\n@SP\nA=M\nM=D\n')
+            file.write('@'+returnAddress+'\nD=A\n@SP\nA=M\nM=D\n')
             spPlusOne()
             file.write('@LCL\nD=M\n@SP\nA=M\nM=D\n')
             spPlusOne()
@@ -188,7 +188,7 @@ def compilerByLine(eachFileName,lineList,xArgsOfCommand):
             file.write('('+lineList[1]+')\n')
             nVars = int(lineList[2])
             for i in range(nVars):
-                file.write('@0\nD=M\nA=M\nM=D\n')
+                file.write('@0\nA=M\nM=0\n')
                 spPlusOne()
 
 if '\\' in filearg: #Windows
