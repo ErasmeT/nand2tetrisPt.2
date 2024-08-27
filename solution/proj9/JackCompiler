@@ -1,5 +1,7 @@
 import sys
 import re
+import xml.etree.ElementTree as ET
+
 filearg = sys.argv[1]
 
 keyword = ['class','constructor','function','method','field','static','var','int','char','boolean','void','true', 'false','null','this', 'let','do','if','else', 'while','return']
@@ -49,7 +51,7 @@ def isIntegerConstant(string):
     
 
 def isStringConstant(string):
-    return '\"' == string[0] and '\"' == string[-1]
+    return '\"' == string[0] and '\"' == string[-1] and string != '\"'
 
 def isIdentifier(string):
     return not string[0].isnumeric()
@@ -77,11 +79,21 @@ def partitioner(text):
     # splitByNotions = re.split(r"([^a-zA-Z\s]| |\n)",result)
     # print(splitByNotions)
     splitByQuotes = re.split(r"(\".+?\")",result)
-    print("splitByQuotes")
-    print(splitByQuotes)
+    splitByQuotesWtQuotes = []
+    while (splitByQuotes):
+        element = splitByQuotes.pop(0)
+        if isStringConstant(element):
+            splitByQuotesWtQuotes.append('\"')
+            splitByQuotesWtQuotes.append(element)
+            splitByQuotesWtQuotes.append('\"')
+        else:
+            splitByQuotesWtQuotes.append(element)
+
+    print("splitByQuotesWtQuotes")
+    print(splitByQuotesWtQuotes)
 
     splitBySpaces  = []
-    for i in splitByQuotes:
+    for i in splitByQuotesWtQuotes:
         if not isStringConstant(i):
             splitBySpaces = splitBySpaces + i.split()
         else:
@@ -106,7 +118,72 @@ with open(filearg,'r') as file:
     text = file.read()
     textList = partitioner(text)
 
+tokens = []
+def outputModifier(value,classi):#remove quotes and replace speciacl symbols
+    if classi == 'StringConstant':
+        return value[1:-1]
+    # elif value == '<':
+    #     return '&lt;'
+    # elif value == '>':
+    #     return '&gt;'
+    # elif value == '\"':
+    #     return '&quot;'
+    # elif value == '>':
+    #     return '&amp;'
+    else:
+        return value
+
+data = ET.Element('data')
+dataList = []
 for i in textList:
     classification = tokenClassification(i)
-    print("<"+classification+"> "+ i + " </"+classification+">")
+    element = ET.SubElement(data,classification)
+    element.text = outputModifier(i,classification)
+    dataList.append([outputModifier(i,classification),classification])
+    print("<"+classification+"> "+ outputModifier(i,classification) + " </"+classification+">")
+
+ET.dump(data)
+
+print(dataList)
+
+xmlfile = ET.Element('xml')
+
+p=0
+
+def eat(string):
+    global p
+    if dataList[p][0] == string:
+        p+= 1
+    else:
+        raise SyntaxError("a "+string+" is missing at"+p)
+
+def compileStatements():
+    pass
+
+def compileIfStatement(handler):
+    global p
+    eat('(')
+    compileExpression()
+    eat(')')
+    eat('{')
+    compileStatements()
+    eat('}')
+
+def compileWhileStatement():
+    global p
+    eat('(')
+    compileExpression()
+    eat(')')
+    eat('{')
+    compileStatements()
+    eat('}')
+
+def compileLetStatement():
+    pass
+
+def compileExpression():
+    pass
+
+def compileTerm():
+    pass
 

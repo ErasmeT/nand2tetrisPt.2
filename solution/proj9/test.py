@@ -1,4 +1,5 @@
 import re
+import xml.etree.ElementTree as ET
 
 keyword = ['class','constructor','function','method','field','static','var','int','char','boolean','void','true', 'false','null','this', 'let','do','if','else', 'while','return']
 symbol = ['{','}','(',')','[',']','.',',',';','+','-','*','/','&','|','>','<','=','~']
@@ -98,29 +99,126 @@ def pattitioner(text):
     return finalList
 
 
+xmltest = """
+<keyword> class </keyword>
+<identifier> Main </identifier>
+<symbol> { </symbol>
+<keyword> function </keyword>
+<keyword> void </keyword>
+<identifier> main </identifier>
+<symbol> ( </symbol>
+<symbol> ) </symbol>
+<symbol> { </symbol>
+<keyword> var </keyword>
+<identifier> Array </identifier>
+<identifier> a </identifier>
+<symbol> ; </symbol>
+<keyword> var </keyword>
+<keyword> int </keyword>
+<identifier> length </identifier>
+<symbol> ; </symbol>
+<keyword> var </keyword>
+<keyword> int </keyword>
+<identifier> i </identifier>
+<symbol> , </symbol>
+<identifier> sum </identifier>
+<symbol> ; </symbol>
+<keyword> let </keyword>
+<identifier> length </identifier>
+<symbol> = </symbol>
+<identifier> Keyboard </identifier>
+<symbol> . </symbol>
+<identifier> readInt </identifier>
+<symbol> ( </symbol>
+<identifier> &quot </identifier>
+<StringConstant> How many numbers?  </StringConstant>
+<identifier> &quot </identifier>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+<keyword> let </keyword>
+<identifier> a </identifier>
+<symbol> = </symbol>
+<identifier> Array </identifier>
+<symbol> . </symbol>
+<identifier> new </identifier>
+<symbol> ( </symbol>
+<identifier> length </identifier>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+<keyword> let </keyword>
+<identifier> i </identifier>
+<symbol> = </symbol>
+<integerConstant> 0 </integerConstant>
+<symbol> ; </symbol>
+<keyword> while </keyword>
+<symbol> ( </symbol>
+<identifier> i </identifier>
+<symbol> &lt </symbol>
+<identifier> length </identifier>
+<symbol> ) </symbol>
+<symbol> { </symbol>
+<keyword> let </keyword>
+<identifier> a </identifier>
+<symbol> [ </symbol>
+<identifier> i </identifier>
+<symbol> ] </symbol>
+<symbol> = </symbol>
+<identifier> Keyboard </identifier>
+<symbol> . </symbol>
+<identifier> readInt </identifier>
+<symbol> ( </symbol>
+<identifier> &quot </identifier>
+<StringConstant> Enter a number:  </StringConstant>
+<identifier> &quot </identifier>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+<keyword> let </keyword>
+<identifier> sum </identifier>
+<symbol> = </symbol>
+<identifier> sum </identifier>
+<symbol> + </symbol>
+<identifier> a </identifier>
+<symbol> [ </symbol>
+<identifier> i </identifier>
+<symbol> ] </symbol>
+<symbol> ; </symbol>
+<keyword> let </keyword>
+<identifier> i </identifier>
+<symbol> = </symbol>
+<identifier> i </identifier>
+<symbol> + </symbol>
+<integerConstant> 1 </integerConstant>
+<symbol> ; </symbol>
+<symbol> } </symbol>
+<keyword> do </keyword>
+<identifier> Output </identifier>
+<symbol> . </symbol>
+<identifier> printString </identifier>
+<symbol> ( </symbol>
+<identifier> &quot </identifier>
+<StringConstant> The average is  </StringConstant>
+<identifier> &quot </identifier>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+<keyword> do </keyword>
+<identifier> Output </identifier>
+<symbol> . </symbol>
+<identifier> printInt </identifier>
+<symbol> ( </symbol>
+<identifier> sum </identifier>
+<symbol> / </symbol>
+<identifier> length </identifier>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+<keyword> return </keyword>
+<symbol> ; </symbol>
+<symbol> } </symbol>
+<symbol> } </symbol>
+"""
 
-
-# StringConstantList = re.split(r"(\".+\")",result)
-# StringConstantListWithoutSpace = []
-# for i in StringConstantList:
-#     StringConstantListWithoutSpace = StringConstantListWithoutSpace + i.split()
-
-# print(StringConstantListWithoutSpace)
-
-# welldoneList = []
-# for i in StringConstantListWithoutSpace:
-#     if not isStringConstant:
-#         temp = re.split(r"([^a-zA-Z\s])",i)
-#         welldoneList = welldoneList + temp
-#     else:
-#         welldoneList = welldoneList + [i]
-
-# print(welldoneList)
-
-
-# test = result.split()
-# print(test)
-
-# result = re.split(r"([^a-zA-Z\s])",result)
-# print(result)
-
+a = ET.Element('this is atag')
+a.text = 'this is the text following atag'
+b = ET.SubElement(a,'btag')
+b.text = 'and this is the text following btag'
+c = ET.SubElement(b,'catg')
+ET.dump(a)
