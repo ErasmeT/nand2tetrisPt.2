@@ -2,11 +2,11 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
-filearg = sys.argv[1]
+
 
 keyword = ['class','constructor','function','method','field','static','var','int','char','boolean','void','true', 'false','null','this', 'let','do','if','else', 'while','return']
 symbol = ['{','}','(',')','[',']','.',',',';','+','-','*','/','&','|','>','<','=','~']
-
+op = ['+','-','=','>','<']
 
 test = """
 // This file is part of www.nand2tetris.org
@@ -48,7 +48,6 @@ def isIntegerConstant(string):
             raise ValueError('number '+string+' overrange')
     else:
         return False
-    
 
 def isStringConstant(string):
     return '\"' == string[0] and '\"' == string[-1] and string != '\"'
@@ -69,8 +68,6 @@ def tokenClassification(inputToken):
         return 'identifier'
     else:
         raise TypeError
-    
-
 
 def partitioner(text):
     result = re.sub(r'/{2}.*\n','',text)
@@ -114,9 +111,15 @@ def partitioner(text):
     print(finalList)
     return finalList
 
-with open(filearg,'r') as file:
-    text = file.read()
-    textList = partitioner(text)
+# test = arg
+# filearg = sys.argv[1]
+# with open(filearg,'r') as file:
+#     text = file.read()
+#     textList = partitioner(text)
+
+#test = text
+text = "while (a+b-c > 100){while (){}while (){}}"
+textList = partitioner(text)
 
 tokens = []
 def outputModifier(value,classi):#remove quotes and replace speciacl symbols
@@ -142,48 +145,111 @@ for i in textList:
     dataList.append([outputModifier(i,classification),classification])
     print("<"+classification+"> "+ outputModifier(i,classification) + " </"+classification+">")
 
-ET.dump(data)
+# ET.dump(data)
 
 print(dataList)
 
 xmlfile = ET.Element('xml')
 
-p=0
+p=1
 
-def eat(string):
+def eat(string,parent):
     global p
     if dataList[p][0] == string:
-        p+= 1
+        leftbracket = ET.SubElement(parent,dataList[p][1])
+        leftbracket.text = dataList[p][0]
+        p += 1
     else:
-        raise SyntaxError("a "+string+" is missing at"+p)
-
-def compileStatements():
-    pass
-
-def compileIfStatement(handler):
+        raise SyntaxError("a "+string+" is missing at"+str(p))
+    
+def eatByType(typeName,parent):
     global p
-    eat('(')
-    compileExpression()
-    eat(')')
-    eat('{')
-    compileStatements()
-    eat('}')
+    #eat a variableName
+    if dataList[p][1] != typeName:
+        raise SyntaxError("must be followed by a varName")
+    varname = ET.SubElement(parent,typeName)
+    varname.text = dataList[p][0]
+    p+=1
 
-def compileWhileStatement():
+def compileStatements(parent):
     global p
-    eat('(')
-    compileExpression()
-    eat(')')
-    eat('{')
-    compileStatements()
-    eat('}')
+    root = ET.SubElement(parent,'statements')
+    while dataList[p][0] != '}':
+        if dataList[p][0] == 'if':
+            p+=1
+            compileIfStatement(root)
+        elif dataList[p][0] == 'while':
+            p+=1
+            compileWhileStatement(root)
+        elif dataList[p][0] == 'let':
+            p+=1
+            compileLetStatement(root)
 
-def compileLetStatement():
-    pass
+def compileIfStatement(parent):
+    global p
+    root = ET.SubElement(parent,'ifStatement')
+    ifTag = ET.SubElement(root,'keyword')
+    ifTag.text = "if"
+    eat('(',root)
+    if dataList[p][0] != ')':
+        compileExpression(root)
+    eat(')',root)
+    eat('{',root)
+    if dataList[p][0] != '}':
+        compileStatements(root)
+    eat('}',root)
 
-def compileExpression():
-    pass
+def compileWhileStatement(parent):
+    global p
+    root = ET.SubElement(parent,'whileStatement')
+    whileTag = ET.SubElement(root,'keyword')
+    whileTag.text = "while"
+    eat('(',root)
+    if dataList[p][0] != ')':
+        compileExpression(root)
+    eat(')',root)
+    eat('{',root)
+    if dataList[p][0] != '}':
+        compileStatements(root)
+    eat('}',root)
 
-def compileTerm():
-    pass
+def compileLetStatement(parent):
+    global p
+    root = ET.SubElement(parent,'letStatement')
+    letTag = ET.SubElement(root,'keyword')
+    letTag.text = 'let'
+    #eat a variableName
+    eatByType('identifier',root)
+    eat('=',root)
+    compileExpression(root)
+    
+def compileExpression(parent):
+    global p
+    root = ET.SubElement(parent,'expression')
+    compileTerm(root)
+    while dataList[p][0] != ')':
+        compileOp(root)
+        compileTerm(root)
 
+def compileOp(parent):
+    global p
+    if dataList[p][0] in op:
+        eat(dataList[p][0],parent)
+    else:
+        raise SyntaxError("an operation symbol is expected at "+ str(p))
+    
+
+def compileTerm(parent):
+    global p
+    root = ET.SubElement(parent,'term')
+    if dataList[p][1] == 'identifier':
+        eatByType('identifier',root)
+    elif dataList[p][1] == 'integerConstant':
+        eatByType('integerConstant',root)
+    else:
+        raise SyntaxError("a varName or a constant is expected at "+ str(p))
+
+
+test2 = ET.Element('test')
+compileIfStatement(test2)
+ET.dump(test2)
