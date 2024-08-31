@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 keyword = ['class','constructor','function','method','field','static','var','int','char','boolean','void','true', 'false','null','this', 'let','do','if','else', 'while','return']
 symbol = ['{','}','(',')','[',']','.',',',';','+','-','*','/','&','|','>','<','=','~']
 op = ['+','-','=','>','<']
+KeywordConstant = ['true','false','null','this']
 
 test = """
 // This file is part of www.nand2tetris.org
@@ -80,9 +81,9 @@ def partitioner(text):
     while (splitByQuotes):
         element = splitByQuotes.pop(0)
         if isStringConstant(element):
-            splitByQuotesWtQuotes.append('\"')
+            # splitByQuotesWtQuotes.append('\"')
             splitByQuotesWtQuotes.append(element)
-            splitByQuotesWtQuotes.append('\"')
+            # splitByQuotesWtQuotes.append('\"')
         else:
             splitByQuotesWtQuotes.append(element)
 
@@ -101,7 +102,7 @@ def partitioner(text):
     finalList =[]
     for i in splitBySpaces:
         if not isStringConstant(i):
-            for j in re.split(r'([^a-zA-Z\s])',i):
+            for j in re.split(r'(\W)',i):
                 if j != '':
                     finalList.append(j)
         else: 
@@ -111,14 +112,14 @@ def partitioner(text):
     print(finalList)
     return finalList
 
-# test = arg
+# # test = arg
 # filearg = sys.argv[1]
 # with open(filearg,'r') as file:
 #     text = file.read()
 #     textList = partitioner(text)
 
 #test = text
-text = "while (a+b-c > 100){while (){}while (){}}"
+text = "while (a+b-c = true){let a = true;}"
 textList = partitioner(text)
 
 tokens = []
@@ -166,7 +167,7 @@ def eatByType(typeName,parent):
     global p
     #eat a variableName
     if dataList[p][1] != typeName:
-        raise SyntaxError("must be followed by a varName")
+        raise SyntaxError("must be followed by a varName at "+str(p))
     varname = ET.SubElement(parent,typeName)
     varname.text = dataList[p][0]
     p+=1
@@ -222,12 +223,13 @@ def compileLetStatement(parent):
     eatByType('identifier',root)
     eat('=',root)
     compileExpression(root)
+    eat(';',root)
     
 def compileExpression(parent):
     global p
     root = ET.SubElement(parent,'expression')
     compileTerm(root)
-    while dataList[p][0] != ')':
+    while (dataList[p][0] in op) and (dataList[p][1] == 'symbol'):
         compileOp(root)
         compileTerm(root)
 
@@ -238,16 +240,36 @@ def compileOp(parent):
     else:
         raise SyntaxError("an operation symbol is expected at "+ str(p))
     
-
 def compileTerm(parent):
     global p
     root = ET.SubElement(parent,'term')
-    if dataList[p][1] == 'identifier':
+    if dataList[p][1] == 'StringConstant':#StringConstant
+        eatByType('StringConstant',root)
+    elif dataList[p][0] in KeywordConstant:
+        new = ET.SubElement(root,'KeywordConstant')
+        eatByType('keyword',new)
+    elif dataList[p][1] == 'identifier':
         eatByType('identifier',root)
     elif dataList[p][1] == 'integerConstant':
         eatByType('integerConstant',root)
     else:
         raise SyntaxError("a varName or a constant is expected at "+ str(p))
+
+def compileClass(parent):
+    pass
+def compileClassVarDec():
+    pass
+def compileType():
+    pass
+def compileSubroutineDec():
+    pass
+def compileParameterList():
+    pass
+def compileSubroutineBody():
+    pass
+
+def compileReturnStatement():
+    pass
 
 
 test2 = ET.Element('test')
